@@ -1,8 +1,6 @@
 from typing import List
-
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
-
 from app.api.v1.endpoints.users import get_current_user
 from app.api.v1.schemas.job import JobRead, JobBid
 from app.db.models.database import db
@@ -36,7 +34,7 @@ async def get_available_jobs(
                     "$centerSphere": [
                         [longitude, latitude],
                         10
-                        / 6378.1,  # Convert radius to radians (Earth's radius in km)
+                        / 6378.1,  # Convert radius to radians
                     ]
                 }
             }
