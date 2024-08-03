@@ -57,15 +57,10 @@ jobs:
       - name: Deploy to DigitalOcean Droplet
         env:
           DO_DROPLET_IP: ${{ secrets.DO_DROPLET_IP }}
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ env.DO_DROPLET_IP }} << 'EOF'
             docker pull bloggervikash/workerlly:latest
             docker stop workerlly || true
             docker rm workerlly || true
-            docker run -d -p 8000:8000 --name workerlly \
-              -e MONGO_URI=${{ env.MONGO_URI }} \
-              -e SECRET_KEY=${{ env.SECRET_KEY }} \
-              bloggervikash/workerlly:latest
+            docker run -d -p 8000:8000 --name workerlly bloggervikash/workerlly:latest
           EOF
