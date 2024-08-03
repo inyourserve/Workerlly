@@ -1,5 +1,7 @@
 import certifi
 from pymongo import MongoClient
+from bson import ObjectId
+
 
 MONGO_CONNECTION_STRING = (
     "mongodb+srv://workerllyapp:fGbE276ePop1iapV@backendking.y6lcith.mongodb.net/"

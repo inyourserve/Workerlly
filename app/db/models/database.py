@@ -1,5 +1,7 @@
 import certifi
 from pymongo import MongoClient
+from bson import ObjectId
+
 
 # Replace the following with your actual MongoDB connection string
 MONGO_CONNECTION_STRING = (
