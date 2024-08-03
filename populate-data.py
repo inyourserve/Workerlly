@@ -1,11 +1,11 @@
 import certifi
 from pymongo import MongoClient
 
-MONGO_CONNECTION_STRING = (
-    "mongodb+srv://workerllyapp:fGbE276ePop1iapV@backendking.y6lcith.mongodb.net/"
-)
+MONGO_CONNECTION_STRING = "mongodb+srv://workerllyapp:fGbE276ePop1iapV@backendking.y6lcith.mongodb.net/"
 
-client = MongoClient(MONGO_CONNECTION_STRING, tlsCAFile=certifi.where())
+client = MongoClient(
+    MONGO_CONNECTION_STRING, tlsCAFile=certifi.where()
+)
 db = client.workerlly  # Use the actual database name
 
 # Sample data for categories

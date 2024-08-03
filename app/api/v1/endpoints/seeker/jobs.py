@@ -16,12 +16,16 @@ router = APIRouter()
     response_model=List[JobRead],
     dependencies=[Depends(role_required("seeker"))],
 )
-async def get_available_jobs(current_user: dict = Depends(get_current_user)):
+async def get_available_jobs(
+    current_user: dict = Depends(get_current_user),
+):
     user_id = current_user["user_id"]
     user = db.users.find_one({"_id": ObjectId(user_id)})
 
     if not user or "location" not in user:
-        raise HTTPException(status_code=400, detail="User location not found")
+        raise HTTPException(
+            status_code=400, detail="User location not found"
+        )
 
     latitude = user["location"]["latitude"]
     longitude = user["location"]["longitude"]
@@ -33,7 +37,8 @@ async def get_available_jobs(current_user: dict = Depends(get_current_user)):
                 "$geoWithin": {
                     "$centerSphere": [
                         [longitude, latitude],
-                        10 / 6378.1,  # Convert radius to radians (Earth's radius in km)
+                        10
+                        / 6378.1,  # Convert radius to radians (Earth's radius in km)
                     ]
                 }
             }
@@ -43,9 +48,14 @@ async def get_available_jobs(current_user: dict = Depends(get_current_user)):
     return [JobRead(id=str(job["_id"]), **job) for job in nearby_jobs]
 
 
-@router.post("/jobs/{job_id}/bid", dependencies=[Depends(role_required("seeker"))])
+@router.post(
+    "/jobs/{job_id}/bid",
+    dependencies=[Depends(role_required("seeker"))],
+)
 async def bid_on_job(
-    job_id: str, bid: JobBid, current_user: dict = Depends(get_current_user)
+    job_id: str,
+    bid: JobBid,
+    current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["user_id"]
 
@@ -55,14 +65,26 @@ async def bid_on_job(
 
     db.jobs.update_one(
         {"_id": ObjectId(job_id)},
-        {"$push": {"bids": {"user_id": user_id, "bid_amount": bid.bid_amount}}},
+        {
+            "$push": {
+                "bids": {
+                    "user_id": user_id,
+                    "bid_amount": bid.bid_amount,
+                }
+            }
+        },
     )
 
     return {"message": "Bid placed successfully"}
 
 
-@router.post("/jobs/{job_id}/accept", dependencies=[Depends(role_required("seeker"))])
-async def accept_job(job_id: str, current_user: dict = Depends(get_current_user)):
+@router.post(
+    "/jobs/{job_id}/accept",
+    dependencies=[Depends(role_required("seeker"))],
+)
+async def accept_job(
+    job_id: str, current_user: dict = Depends(get_current_user)
+):
     user_id = current_user["user_id"]
 
     job = db.jobs.find_one({"_id": ObjectId(job_id)})
@@ -70,7 +92,9 @@ async def accept_job(job_id: str, current_user: dict = Depends(get_current_user)
         raise HTTPException(status_code=404, detail="Job not found")
 
     if job["accepted_by"]:
-        raise HTTPException(status_code=400, detail="Job already accepted")
+        raise HTTPException(
+            status_code=400, detail="Job already accepted"
+        )
 
     db.jobs.update_one(
         {"_id": ObjectId(job_id)},

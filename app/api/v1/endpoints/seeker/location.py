@@ -9,9 +9,13 @@ from app.utils.roles import role_required
 router = APIRouter()
 
 
-@router.post("/location/update", dependencies=[Depends(role_required("seeker"))])
+@router.post(
+    "/location/update",
+    dependencies=[Depends(role_required("seeker"))],
+)
 async def update_location(
-    location: LocationUpdate, current_user: dict = Depends(get_current_user)
+    location: LocationUpdate,
+    current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["user_id"]
 
