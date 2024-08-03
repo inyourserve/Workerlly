@@ -13,7 +13,5 @@ def update_status(status: str, current_user: dict = Depends(get_current_user)):
     user_id = current_user["user_id"]
     if status not in ["online", "offline"]:
         raise HTTPException(status_code=400, detail="Invalid status")
-    db.users.update_one(
-        {"_id": ObjectId(user_id)}, {"$set": {"status": status}}
-    )
+    db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"status": status}})
     return {"message": f"Status updated to {status}"}

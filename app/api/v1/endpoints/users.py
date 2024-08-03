@@ -16,16 +16,12 @@ router = APIRouter()
 # APIKeyHeader is a class that provides an authentication mechanism
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 # Secret key and algorithm for JWT token generation
-SECRET_KEY = secrets.token_hex(
-    32
-)  # Generates a 64-character hexadecimal string
+SECRET_KEY = secrets.token_hex(32)  # Generates a 64-character hexadecimal string
 ALGORITHM = "HS256"
 
 
 # Function to create an access token using JWT
-def create_access_token(
-    data: dict, expires_delta: timedelta = timedelta(minutes=600)
-):
+def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=600)):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
@@ -35,9 +31,7 @@ def create_access_token(
 
 @router.post("/users/register")
 def register_user(user: UserSchema):
-    print(
-        f"Registering user with mobile: {user.mobile} and roles: {user.roles}"
-    )
+    print(f"Registering user with mobile: {user.mobile} and roles: {user.roles}")
     if not send_otp(user.mobile):
         raise HTTPException(status_code=500, detail="Failed to send OTP")
     return {"message": "OTP sent to mobile"}
@@ -57,12 +51,8 @@ def authenticate_user(mobile: str, otp: str, roles: List[str]):
     else:
         user_id = existing_user["_id"]
         existing_roles = existing_user.get("roles", [])
-        updated_roles = list(
-            set(existing_roles + roles)
-        )  # Merge and remove duplicates
-        db.users.update_one(
-            {"_id": user_id}, {"$set": {"roles": updated_roles}}
-        )
+        updated_roles = list(set(existing_roles + roles))  # Merge and remove duplicates
+        db.users.update_one({"_id": user_id}, {"$set": {"roles": updated_roles}})
         roles = updated_roles
         print(f"Updated roles for user: {updated_roles}")
 

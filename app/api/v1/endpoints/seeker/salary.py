@@ -12,9 +12,7 @@ router = APIRouter()
 @router.post("/salary/calculate", response_model=SalaryCalculationResponse)
 async def calculate_salary(request: SalaryCalculationRequest):
     # Fetch the rate for the given city and category
-    rate_data = db.rates.find_one(
-        {"city": request.city, "category": request.category}
-    )
+    rate_data = db.rates.find_one({"city": request.city, "category": request.category})
     if not rate_data:
         raise HTTPException(
             status_code=404,

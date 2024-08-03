@@ -33,8 +33,7 @@ async def get_available_jobs(
                 "$geoWithin": {
                     "$centerSphere": [
                         [longitude, latitude],
-                        10
-                        / 6378.1,  # Convert radius to radians
+                        10 / 6378.1,  # Convert radius to radians (Earth's radius in km)
                     ]
                 }
             }
@@ -78,9 +77,7 @@ async def bid_on_job(
     "/jobs/{job_id}/accept",
     dependencies=[Depends(role_required("seeker"))],
 )
-async def accept_job(
-    job_id: str, current_user: dict = Depends(get_current_user)
-):
+async def accept_job(job_id: str, current_user: dict = Depends(get_current_user)):
     user_id = current_user["user_id"]
 
     job = db.jobs.find_one({"_id": ObjectId(job_id)})
