@@ -8,12 +8,8 @@ from app.utils.roles import role_required
 router = APIRouter()
 
 
-@router.post(
-    "/status", dependencies=[Depends(role_required("seeker"))]
-)
-def update_status(
-    status: str, current_user: dict = Depends(get_current_user)
-):
+@router.post("/status", dependencies=[Depends(role_required("seeker"))])
+def update_status(status: str, current_user: dict = Depends(get_current_user)):
     user_id = current_user["user_id"]
     if status not in ["online", "offline"]:
         raise HTTPException(status_code=400, detail="Invalid status")

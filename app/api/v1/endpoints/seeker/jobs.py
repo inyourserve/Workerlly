@@ -23,9 +23,7 @@ async def get_available_jobs(
     user = db.users.find_one({"_id": ObjectId(user_id)})
 
     if not user or "location" not in user:
-        raise HTTPException(
-            status_code=400, detail="User location not found"
-        )
+        raise HTTPException(status_code=400, detail="User location not found")
 
     latitude = user["location"]["latitude"]
     longitude = user["location"]["longitude"]
@@ -92,9 +90,7 @@ async def accept_job(
         raise HTTPException(status_code=404, detail="Job not found")
 
     if job["accepted_by"]:
-        raise HTTPException(
-            status_code=400, detail="Job already accepted"
-        )
+        raise HTTPException(status_code=400, detail="Job already accepted")
 
     db.jobs.update_one(
         {"_id": ObjectId(job_id)},

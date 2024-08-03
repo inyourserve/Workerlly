@@ -9,9 +9,7 @@ router = APIRouter()
 
 @router.get("/city/check", response_model=CityCheckResponse)
 async def check_city(
-    city_id: str = Query(
-        ..., description="The ID of the city to check"
-    )
+    city_id: str = Query(..., description="The ID of the city to check")
 ):
     # Check if the city is active based on the city_id
     city_data = db.cities.find_one(

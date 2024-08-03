@@ -29,9 +29,7 @@ def create_access_token(
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(
-        to_encode, SECRET_KEY, algorithm=ALGORITHM
-    )
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
@@ -41,26 +39,20 @@ def register_user(user: UserSchema):
         f"Registering user with mobile: {user.mobile} and roles: {user.roles}"
     )
     if not send_otp(user.mobile):
-        raise HTTPException(
-            status_code=500, detail="Failed to send OTP"
-        )
+        raise HTTPException(status_code=500, detail="Failed to send OTP")
     return {"message": "OTP sent to mobile"}
 
 
 @router.post("/users/auth")
 def authenticate_user(mobile: str, otp: str, roles: List[str]):
-    print(
-        f"Authenticating user with mobile: {mobile} and roles: {roles}"
-    )
+    print(f"Authenticating user with mobile: {mobile} and roles: {roles}")
     if not verify_otp(mobile, otp):
         raise HTTPException(status_code=400, detail="Invalid OTP")
 
     existing_user = db.users.find_one({"mobile": mobile})
     if not existing_user:
         print("User does not exist, creating a new one.")
-        result = db.users.insert_one(
-            {"mobile": mobile, "roles": roles}
-        )
+        result = db.users.insert_one({"mobile": mobile, "roles": roles})
         user_id = result.inserted_id  # Get the MongoDB ObjectId
     else:
         user_id = existing_user["_id"]
@@ -88,25 +80,15 @@ def authenticate_user(mobile: str, otp: str, roles: List[str]):
 
 def get_current_user(api_key: str = Depends(api_key_header)):
     if not api_key:
-        raise HTTPException(
-            status_code=401, detail="Not authenticated"
-        )
-    token = (
-        api_key.split(" ")[1]
-        if api_key.startswith("Bearer ")
-        else api_key
-    )
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    token = api_key.split(" ")[1] if api_key.startswith("Bearer ") else api_key
     try:
-        payload = jwt.decode(
-            token, SECRET_KEY, algorithms=[ALGORITHM]
-        )
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         mobile: str = payload.get("mobile")
         user_id: str = payload.get("user_id")
         roles: List[str] = payload.get("roles", [])
         if mobile is None or not roles:
-            raise HTTPException(
-                status_code=400, detail="Invalid token"
-            )
+            raise HTTPException(status_code=400, detail="Invalid token")
         return {"user_id": user_id, "mobile": mobile, "roles": roles}
     except jwt.JWTError:
         raise HTTPException(status_code=400, detail="Invalid token")

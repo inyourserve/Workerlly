@@ -18,7 +18,5 @@ def complete_profile(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["user_id"]
-    db.users.update_one(
-        {"_id": ObjectId(user_id)}, {"$set": profile.dict()}
-    )
+    db.users.update_one({"_id": ObjectId(user_id)}, {"$set": profile.dict()})
     return {"message": "Profile updated successfully"}
