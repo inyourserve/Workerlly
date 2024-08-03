@@ -45,18 +45,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Copy SSH key
+      - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.DO_DROPLET_SSH_KEY }}
 
+      - name: Add DigitalOcean Droplet's SSH key to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.DO_DROPLET_IP }} >> ~/.ssh/known_hosts
+
       - name: Deploy to DigitalOcean Droplet
         env:
           DO_DROPLET_IP: ${{ secrets.DO_DROPLET_IP }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
-          ssh root@${{ env.DO_DROPLET_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no root@${{ env.DO_DROPLET_IP }} << 'EOF'
             docker pull bloggervikash/workerlly:latest
             docker stop workerlly || true
             docker rm workerlly || true
-            docker run -d -p 8000:8000 --name workerlly bloggervikash/workerlly:latest
+            docker run -d -p 8000:8000 --name workerlly \
+              -e MONGO_URI=${{ env.MONGO_URI }} \
+              -e SECRET_KEY=${{ env.SECRET_KEY }} \
+              bloggervikash/workerlly:latest
           EOF
