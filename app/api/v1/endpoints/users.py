@@ -1,13 +1,15 @@
+import secrets
+from datetime import datetime, timedelta
+from typing import List
+
+import jwt
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import APIKeyHeader
-import jwt
-from datetime import datetime, timedelta
-from typing import List
+
 from app.api.v1.schemas.user import UserSchema, UserRead
-from app.utils.msg91 import send_otp, verify_otp
 from app.db.models.database import db
-import secrets
+from app.utils.msg91 import send_otp, verify_otp
 
 router = APIRouter()
 
@@ -17,6 +19,7 @@ api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 SECRET_KEY = secrets.token_hex(32)  # Generates a 64-character hexadecimal string
 ALGORITHM = "HS256"
 
+
 # Function to create an access token using JWT
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=600)):
     to_encode = data.copy()
@@ -25,12 +28,14 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 @router.post("/users/register")
 def register_user(user: UserSchema):
     print(f"Registering user with mobile: {user.mobile} and roles: {user.roles}")
     if not send_otp(user.mobile):
         raise HTTPException(status_code=500, detail="Failed to send OTP")
     return {"message": "OTP sent to mobile"}
+
 
 @router.post("/users/auth")
 def authenticate_user(mobile: str, otp: str, roles: List[str]):
@@ -44,7 +49,7 @@ def authenticate_user(mobile: str, otp: str, roles: List[str]):
         result = db.users.insert_one({"mobile": mobile, "roles": roles})
         user_id = result.inserted_id  # Get the MongoDB ObjectId
     else:
-        user_id = existing_user['_id']
+        user_id = existing_user["_id"]
         existing_roles = existing_user.get("roles", [])
         updated_roles = list(set(existing_roles + roles))  # Merge and remove duplicates
         db.users.update_one({"_id": user_id}, {"$set": {"roles": updated_roles}})
@@ -52,9 +57,12 @@ def authenticate_user(mobile: str, otp: str, roles: List[str]):
         print(f"Updated roles for user: {updated_roles}")
 
     # Generate a JWT token for the user with user_id and roles
-    token = create_access_token(data={"user_id": str(user_id), "mobile": mobile, "roles": roles})
+    token = create_access_token(
+        data={"user_id": str(user_id), "mobile": mobile, "roles": roles}
+    )
 
     return {"access_token": token, "token_type": "bearer"}
+
 
 def get_current_user(api_key: str = Depends(api_key_header)):
     if not api_key:
@@ -70,6 +78,7 @@ def get_current_user(api_key: str = Depends(api_key_header)):
         return {"user_id": user_id, "mobile": mobile, "roles": roles}
     except jwt.JWTError:
         raise HTTPException(status_code=400, detail="Invalid token")
+
 
 @router.get("/me", response_model=UserRead)
 def get_current_user_endpoint(current_user: dict = Depends(get_current_user)):
@@ -91,5 +100,5 @@ def get_current_user_endpoint(current_user: dict = Depends(get_current_user)):
         city=user_details.get("city"),
         skills=user_details.get("skills", []),
         experience=user_details.get("experience", 0),
-        rating=user_details.get("rating", 0.0)
+        rating=user_details.get("rating", 0.0),
     )

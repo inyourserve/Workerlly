@@ -1,16 +1,25 @@
+import uuid
+from datetime import datetime
 from typing import List
 
-from fastapi import APIRouter, HTTPException, Depends
-from app.api.v1.schemas.wallet import WalletRecharge, WalletResponse, Transaction, Payment
-from app.db.models.database import db
-from app.api.v1.endpoints.users import get_current_user
 from bson import ObjectId
-from datetime import datetime
-import uuid
+from fastapi import APIRouter, HTTPException, Depends
+
+from app.api.v1.endpoints.users import get_current_user
+from app.api.v1.schemas.wallet import (
+    WalletRecharge,
+    WalletResponse,
+    Transaction,
+    Payment,
+)
+from app.db.models.database import db
 
 router = APIRouter()
 
-@router.get("/wallet", response_model=WalletResponse, dependencies=[Depends(get_current_user)])
+
+@router.get(
+    "/wallet", response_model=WalletResponse, dependencies=[Depends(get_current_user)]
+)
 async def get_wallet(current_user: dict = Depends(get_current_user)):
     user_id = current_user["user_id"]
     wallet = db.wallets.find_one({"user_id": ObjectId(user_id)})
@@ -21,11 +30,18 @@ async def get_wallet(current_user: dict = Depends(get_current_user)):
     return WalletResponse(
         user_id=str(wallet["user_id"]),
         balance=wallet["balance"],
-        transactions=[Transaction(**tx) for tx in transactions]
+        transactions=[Transaction(**tx) for tx in transactions],
     )
 
-@router.post("/wallet/recharge", response_model=WalletResponse, dependencies=[Depends(get_current_user)])
-async def recharge_wallet(recharge: WalletRecharge, current_user: dict = Depends(get_current_user)):
+
+@router.post(
+    "/wallet/recharge",
+    response_model=WalletResponse,
+    dependencies=[Depends(get_current_user)],
+)
+async def recharge_wallet(
+    recharge: WalletRecharge, current_user: dict = Depends(get_current_user)
+):
     user_id = current_user["user_id"]
 
     wallet = db.wallets.find_one({"user_id": ObjectId(user_id)})
@@ -34,14 +50,16 @@ async def recharge_wallet(recharge: WalletRecharge, current_user: dict = Depends
         wallet = db.wallets.find_one({"user_id": ObjectId(user_id)})
 
     new_balance = wallet["balance"] + recharge.amount
-    db.wallets.update_one({"user_id": ObjectId(user_id)}, {"$set": {"balance": new_balance}})
+    db.wallets.update_one(
+        {"user_id": ObjectId(user_id)}, {"$set": {"balance": new_balance}}
+    )
 
     transaction = {
         "transaction_id": str(uuid.uuid4()),
         "user_id": ObjectId(user_id),
         "type": "recharge",
         "amount": recharge.amount,
-        "date": datetime.utcnow()
+        "date": datetime.utcnow(),
     }
     db.transactions.insert_one(transaction)
 
@@ -49,11 +67,18 @@ async def recharge_wallet(recharge: WalletRecharge, current_user: dict = Depends
     return WalletResponse(
         user_id=str(wallet["user_id"]),
         balance=new_balance,
-        transactions=[Transaction(**tx) for tx in transactions]
+        transactions=[Transaction(**tx) for tx in transactions],
     )
 
-@router.post("/wallet/payment", response_model=WalletResponse, dependencies=[Depends(get_current_user)])
-async def process_payment(payment: Payment, current_user: dict = Depends(get_current_user)):
+
+@router.post(
+    "/wallet/payment",
+    response_model=WalletResponse,
+    dependencies=[Depends(get_current_user)],
+)
+async def process_payment(
+    payment: Payment, current_user: dict = Depends(get_current_user)
+):
     user_id = current_user["user_id"]
 
     wallet = db.wallets.find_one({"user_id": ObjectId(user_id)})
@@ -64,14 +89,16 @@ async def process_payment(payment: Payment, current_user: dict = Depends(get_cur
         raise HTTPException(status_code=400, detail="Insufficient balance")
 
     new_balance = wallet["balance"] - payment.amount
-    db.wallets.update_one({"user_id": ObjectId(user_id)}, {"$set": {"balance": new_balance}})
+    db.wallets.update_one(
+        {"user_id": ObjectId(user_id)}, {"$set": {"balance": new_balance}}
+    )
 
     transaction = {
         "transaction_id": str(uuid.uuid4()),
         "user_id": ObjectId(user_id),
         "type": "payment",
         "amount": payment.amount,
-        "date": datetime.utcnow()
+        "date": datetime.utcnow(),
     }
     db.transactions.insert_one(transaction)
 
@@ -79,10 +106,15 @@ async def process_payment(payment: Payment, current_user: dict = Depends(get_cur
     return WalletResponse(
         user_id=str(wallet["user_id"]),
         balance=new_balance,
-        transactions=[Transaction(**tx) for tx in transactions]
+        transactions=[Transaction(**tx) for tx in transactions],
     )
 
-@router.get("/wallet/transactions", response_model=List[Transaction], dependencies=[Depends(get_current_user)])
+
+@router.get(
+    "/wallet/transactions",
+    response_model=List[Transaction],
+    dependencies=[Depends(get_current_user)],
+)
 async def get_transactions(current_user: dict = Depends(get_current_user)):
     user_id = current_user["user_id"]
     transactions = list(db.transactions.find({"user_id": ObjectId(user_id)}))

@@ -1,12 +1,16 @@
-from pydantic import BaseModel
-from typing import List
 from datetime import datetime
+from typing import List
+
+from pydantic import BaseModel
+
 
 class WalletRecharge(BaseModel):
     amount: float
 
+
 class Payment(BaseModel):
     amount: float
+
 
 class Transaction(BaseModel):
     transaction_id: str
@@ -14,6 +18,7 @@ class Transaction(BaseModel):
     type: str  # "recharge" or "payment"
     amount: float
     date: datetime
+
 
 class WalletResponse(BaseModel):
     user_id: str

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from app.api.v1.endpoints import users, data, city_check
 from app.api.v1.endpoints.seeker import jobs, salary, status, wallet, profile
 
@@ -12,5 +13,3 @@ app.include_router(status.router, prefix="/api/v1/status", tags=["on/off"])
 app.include_router(salary.router, prefix="/api/v1/salary", tags=["Calculate Salary"])
 app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["jobs"])
 app.include_router(wallet.router, prefix="/api/v1/wallet", tags=["wallet"])
-
-

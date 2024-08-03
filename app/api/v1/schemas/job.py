@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class JobCreate(BaseModel):
     title: str
@@ -11,6 +13,7 @@ class JobCreate(BaseModel):
     address: str
     start_date: str
     end_date: Optional[str]
+
 
 class JobRead(BaseModel):
     id: str
@@ -27,6 +30,7 @@ class JobRead(BaseModel):
     status: str
     accepted_by: Optional[str] = None
     bids: Optional[List[dict]] = Field(default_factory=list)
+
 
 class JobBid(BaseModel):
     bid_amount: float
