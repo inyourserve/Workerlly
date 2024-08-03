@@ -1,5 +1,4 @@
 certifi~=2024.7.4
-bson~=0.5.10
 pydantic~=2.8.2
 fastapi~=0.111.1
 jose~=1.0.0
