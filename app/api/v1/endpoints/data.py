@@ -4,6 +4,7 @@ from bson import ObjectId
 
 router = APIRouter()
 
+
 @router.get("/categories")
 def get_categories():
     categories = list(db.categories.find({}))
@@ -15,6 +16,7 @@ def get_categories():
                 if isinstance(sub_category, dict):
                     sub_category["id"] = str(sub_category["id"])
     return {"categories": categories}
+
 
 @router.get("/cities")
 def get_cities():
