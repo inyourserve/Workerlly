@@ -6,6 +6,7 @@ import jwt
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import APIKeyHeader
+from pydantic import BaseModel
 
 from app.api.v1.schemas.user import UserSchema, UserRead
 from app.db.models.database import db
@@ -29,6 +30,12 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes
     return encoded_jwt
 
 
+class AuthRequest(BaseModel):
+    mobile: str
+    otp: str
+    roles: List[str]
+
+
 @router.post("/users/register")
 def register_user(user: UserSchema):
     print(f"Registering user with mobile: {user.mobile} and roles: {user.roles}")
@@ -38,7 +45,11 @@ def register_user(user: UserSchema):
 
 
 @router.post("/users/auth")
-def authenticate_user(mobile: str, otp: str, roles: List[str]):
+def authenticate_user(auth_request: AuthRequest):
+    mobile = auth_request.mobile
+    otp = auth_request.otp
+    roles = auth_request.roles
+
     print(f"Authenticating user with mobile: {mobile} and roles: {roles}")
     if not verify_otp(mobile, otp):
         raise HTTPException(status_code=400, detail="Invalid OTP")
