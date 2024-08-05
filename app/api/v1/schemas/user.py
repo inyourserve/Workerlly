@@ -29,6 +29,7 @@ class UserRead(BaseModel):
     id: str
     mobile: str
     roles: List[str]
+    status: bool
     name: Optional[str] = None
     city: Optional[str] = None
     skills: Optional[List[str]] = []
@@ -38,7 +39,8 @@ class UserRead(BaseModel):
 
 class ProfileComplete(BaseModel):
     name: str
-    category: str
-    sub_category: List[str]
-    city: str
-    experience: Optional[int]
+    category_id: str
+    sub_category_id: List[str]
+    city_id: str
+    experience: int
+    # Add other fields as needed

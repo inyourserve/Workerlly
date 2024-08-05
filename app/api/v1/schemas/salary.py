@@ -2,8 +2,8 @@ from pydantic import BaseModel
 
 
 class SalaryCalculationRequest(BaseModel):
-    city: str
-    category: str
+    category_id: str
+    city_id: str
     hours_per_day: int
     days_per_month: int
 

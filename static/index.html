@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rate Entry</title>
+</head>
+<body>
+    <h1>Rate Entry for City</h1>
+    <label for="city">Select City:</label>
+    <select id="city" onchange="loadCategoriesAndRates()">
+        <!-- City options will be populated here -->
+    </select>
+    <div id="categories">
+        <!-- Categories and input fields for rates will be populated here -->
+    </div>
+    <button onclick="submitRates()">Submit Rates</button>
+
+    <script>
+        async function fetchCities() {
+            const response = await fetch('/api/v1/cities');
+            const data = await response.json();
+            const citySelect = document.getElementById('city');
+            data.cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city._id;
+                option.textContent = city.name;
+                citySelect.appendChild(option);
+            });
+        }
+
+        async function loadCategoriesAndRates() {
+            const cityId = document.getElementById('city').value;
+            const categoryDiv = document.getElementById('categories');
+            categoryDiv.innerHTML = ''; // Clear existing categories
+
+            const categoriesResponse = await fetch('/api/v1/categories');
+            const categoriesData = await categoriesResponse.json();
+
+            const ratesResponse = await fetch(`/api/v1/rates/${cityId}`);
+            const ratesData = await ratesResponse.json();
+            const rates = ratesData.rates.reduce((acc, rate) => {
+                acc[rate.category_id] = rate.rate_per_hour;
+                return acc;
+            }, {});
+
+            categoriesData.categories.forEach(category => {
+                const categoryDiv = document.createElement('div');
+                const label = document.createElement('label');
+                label.textContent = category.name;
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.value = rates[category._id] || ''; // Set existing rate if available
+                input.id = `rate-${category._id}`;
+                categoryDiv.appendChild(label);
+                categoryDiv.appendChild(input);
+                document.getElementById('categories').appendChild(categoryDiv);
+            });
+        }
+
+        async function submitRates() {
+            const cityId = document.getElementById('city').value;
+            const categoriesResponse = await fetch('/api/v1/categories');
+            const categoriesData = await categoriesResponse.json();
+
+            for (const category of categoriesData.categories) {
+                const rateInput = document.getElementById(`rate-${category._id}`);
+                const rate = rateInput.value;
+                if (rate) {
+                    await fetch('/api/v1/rates', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            city_id: cityId,
+                            category_id: category._id,
+                            rate_per_hour: rate
+                        })
+                    });
+                }
+            }
+            alert('Rates submitted successfully');
+        }
+
+        fetchCities();
+    </script>
+</body>
+</html>

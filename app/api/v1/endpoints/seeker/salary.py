@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-
+from bson import ObjectId
 from app.api.v1.schemas.salary import (
     SalaryCalculationRequest,
     SalaryCalculationResponse,
@@ -11,8 +11,17 @@ router = APIRouter()
 
 @router.post("/salary/calculate", response_model=SalaryCalculationResponse)
 async def calculate_salary(request: SalaryCalculationRequest):
-    # Fetch the rate for the given city and category
-    rate_data = db.rates.find_one({"city": request.city, "category": request.category})
+    # Fetch the rate for the given city_id and category_id
+    rate_data = db.rates.find_one(
+        {
+            "city_id": str(request.city_id),
+            "category_id": str(request.category_id),
+        }
+    )
+    print(
+        f"Rate data fetched for city_id {request.city_id} and category_id {request.category_id}: {rate_data}"
+    )
+
     if not rate_data:
         raise HTTPException(
             status_code=404,

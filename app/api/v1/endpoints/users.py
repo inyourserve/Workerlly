@@ -1,13 +1,11 @@
 import secrets
 from datetime import datetime, timedelta
 from typing import List
-
 import jwt
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
-
 from app.api.v1.schemas.user import UserSchema, UserRead
 from app.db.models.database import db
 from app.utils.msg91 import send_otp, verify_otp
@@ -113,6 +111,7 @@ def get_current_user_endpoint(
         id=str(user_details["_id"]),
         mobile=user_details["mobile"],
         roles=user_details["roles"],
+        status=user_details["status"],
         name=user_details.get("name"),
         city=user_details.get("city"),
         skills=user_details.get("skills", []),
