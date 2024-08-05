@@ -1,8 +1,7 @@
 # app/api/v1/endpoints/rates.py
-from fastapi import APIRouter, HTTPException
 from app.db.models.database import db
 from app.api.v1.schemas.rate import Rate
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from bson import ObjectId
 
 router = APIRouter()
