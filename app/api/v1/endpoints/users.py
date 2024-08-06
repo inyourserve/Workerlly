@@ -55,12 +55,17 @@ def authenticate_user(auth_request: AuthRequest):
     existing_user = db.users.find_one({"mobile": mobile})
     if not existing_user:
         print("User does not exist, creating a new one.")
-        result = db.users.insert_one({"mobile": mobile, "roles": roles})
+        result = db.users.insert_one(
+            {"mobile": mobile, "roles": list(set(roles)), "status": False}
+        )
         user_id = result.inserted_id  # Get the MongoDB ObjectId
     else:
         user_id = existing_user["_id"]
-        existing_roles = existing_user.get("roles", [])
-        updated_roles = list(set(existing_roles + roles))  # Merge and remove duplicates
+        existing_roles = set(existing_user.get("roles", []))
+        new_roles = set(roles)
+        updated_roles = list(
+            existing_roles.union(new_roles)
+        )  # Merge and remove duplicates
         db.users.update_one({"_id": user_id}, {"$set": {"roles": updated_roles}})
         roles = updated_roles
         print(f"Updated roles for user: {updated_roles}")
@@ -89,8 +94,10 @@ def get_current_user(api_key: str = Depends(api_key_header)):
         if mobile is None or not roles:
             raise HTTPException(status_code=400, detail="Invalid token")
         return {"user_id": user_id, "mobile": mobile, "roles": roles}
-    except jwt.JWTError:
-        raise HTTPException(status_code=400, detail="Invalid token")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 @router.get("/me", response_model=UserRead)
@@ -111,7 +118,9 @@ def get_current_user_endpoint(
         id=str(user_details["_id"]),
         mobile=user_details["mobile"],
         roles=user_details["roles"],
-        status=user_details["status"],
+        status=user_details.get(
+            "status", False
+        ),  # Ensure status has a default value of False
         name=user_details.get("name"),
         city=user_details.get("city"),
         skills=user_details.get("skills", []),

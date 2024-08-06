@@ -26,7 +26,7 @@ def complete_profile(
         raise HTTPException(status_code=400, detail="Invalid category ID")
 
     # Validate sub-category IDs
-    for sub_category_id in profile.sub_category_ids:
+    for sub_category_id in profile.sub_category_id:
         if not any(sub["id"] == sub_category_id for sub in category["sub_categories"]):
             raise HTTPException(
                 status_code=400, detail=f"Invalid sub-category ID: {sub_category_id}"
@@ -40,7 +40,7 @@ def complete_profile(
     # Update profile with IDs
     profile_data = profile.dict()
     profile_data["category_id"] = ObjectId(profile.category_id)
-    profile_data["sub_category_ids"] = profile.sub_category_ids
+    profile_data["sub_category_id"] = [ObjectId(id) for id in profile.sub_category_id]
     profile_data["city_id"] = ObjectId(profile.city_id)
 
     db.users.update_one({"_id": ObjectId(user_id)}, {"$set": profile_data})

@@ -1,24 +1,11 @@
 from http.client import HTTPException
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from app.db.models.database import db
 from bson import ObjectId
 from app.api.v1.schemas.city_check import CityCheckResponse
 
 router = APIRouter()
-
-
-@router.get("/categories")
-def get_categories():
-    categories = list(db.categories.find({}))
-    # Convert ObjectId to string for each category and sub-category
-    for category in categories:
-        category["_id"] = str(category["_id"])
-        if "sub_categories" in category:
-            for sub_category in category["sub_categories"]:
-                if isinstance(sub_category, dict):
-                    sub_category["id"] = str(sub_category["id"])
-    return {"categories": categories}
 
 
 @router.get("/cities")
@@ -41,3 +28,15 @@ def update_city_service_status(city_id: str, update: CityCheckResponse):
         raise HTTPException(
             status_code=404, detail="City not found or status unchanged"
         )
+
+
+@router.get("/city/check", response_model=CityCheckResponse)
+async def check_city(
+    city_id: str = Query(..., description="The ID of the city to check")
+):
+    # Check if the city is served based on the city_id and is_served field
+    city_data = db.cities.find_one({"_id": ObjectId(city_id), "is_served": True})
+    if city_data:
+        return CityCheckResponse(is_served=True)
+    else:
+        return CityCheckResponse(is_served=False)
