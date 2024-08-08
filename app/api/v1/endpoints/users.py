@@ -101,7 +101,7 @@ def get_current_user(api_key: str = Depends(api_key_header)):
 
 
 @router.get("/me1")
-def get_current_user_endpoint(
+def get_current_user(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["user_id"]
