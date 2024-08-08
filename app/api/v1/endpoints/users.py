@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import List
 import jwt
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 from app.api.v1.schemas.user import UserSchema, UserRead
@@ -98,6 +98,35 @@ def get_current_user(api_key: str = Depends(api_key_header)):
         raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+@router.get("/me1")
+def get_current_user_endpoint(
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    # Convert user_id from string to ObjectId
+
+    # Convert user_id from string to ObjectId
+    object_id = ObjectId(user_id)
+
+    # Fetch user details from the database using the ObjectId
+    user_details = db.users.find_one({"_id": object_id})
+    if not user_details:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Convert ObjectId fields to string for JSON serialization
+    user_details["_id"] = str(user_details["_id"])
+    if "city_id" in user_details:
+        user_details["city_id"] = str(user_details["city_id"])
+    if "category_id" in user_details:
+        user_details["category_id"] = str(user_details["category_id"])
+    if "sub_category_id" in user_details:
+        user_details["sub_category_id"] = [
+            str(sub_id) for sub_id in user_details["sub_category_id"]
+        ]
+
+    return user_details
 
 
 @router.get("/me", response_model=UserRead)

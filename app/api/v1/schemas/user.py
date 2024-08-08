@@ -25,22 +25,21 @@ class UserSchema(BaseModel):
     roles: List[str]
 
 
-class UserRead(BaseModel):
-    id: str
-    mobile: str
-    roles: List[str]
-    status: bool
-    name: Optional[str] = None
-    city: Optional[str] = None
-    skills: Optional[List[str]] = []
-    experience: Optional[int] = 0
-    rating: Optional[float] = 0.0
-
-
 class ProfileComplete(BaseModel):
     name: str
     category_id: str
     sub_category_id: List[str]
     city_id: str
     experience: int
+
+
+class UserRead(BaseModel):
+    id: str
+    mobile: str
+    roles: List[str]
+    status: bool
+    name: Optional[str] = None
+    skills: Optional[List[str]] = []
+    experience: Optional[int] = 0
+    rating: Optional[float] = 0.0
     # Add other fields as needed

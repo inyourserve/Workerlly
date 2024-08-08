@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+            transition: width 0.3s;
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: margin-left 0.3s;
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar a {
+                padding: 10px;
+            }
+
+            .content {
+                margin-left: 60px;
+            }
+
+            .sidebar .text {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h4 class="text-center">Admin Panel</h4>
+        <a href="#" onclick="loadPage('dashboard.html')"><span class="text">Dashboard</span></a>
+        <a href="#" onclick="loadPage('cat.html')"><span class="text">Manage Categories</span></a>
+        <a href="#" onclick="loadPage('city.html')"><span class="text">Manage City Services</span></a>
+        <a href="#" onclick="loadPage('rate.html')"><span class="text">Manage Rates</span></a>
+        <a href="#users"><span class="text">Manage Users</span></a>
+        <a href="#wallet"><span class="text">Manage Wallet</span></a>
+        <a href="#jobs"><span class="text">Manage Jobs</span></a>
+    </div>
+    <div class="container-fluid content" id="content">
+        <!-- Content will be loaded here -->
+    </div>
+
+    <script>
+        function loadPage(page) {
+            fetch(page)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('content').innerHTML = data;
+                })
+                .catch(error => console.error('Error loading page:', error));
+        }
+
+        // Load the default dashboard page on initial load
+        document.addEventListener("DOMContentLoaded", function () {
+            loadPage('dashboard.html');
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

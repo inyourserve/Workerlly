@@ -3,17 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Rate Entry</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Rate Entry for City</h1>
-    <label for="city">Select City:</label>
-    <select id="city" onchange="loadCategoriesAndRates()">
-        <!-- City options will be populated here -->
-    </select>
-    <div id="categories">
-        <!-- Categories and input fields for rates will be populated here -->
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Rate Entry for City</h1>
+        <div class="form-group">
+            <label for="city">Select City:</label>
+            <select class="form-control" id="city" onchange="loadCategoriesAndRates()">
+                <!-- City options will be populated here -->
+            </select>
+        </div>
+        <div id="categories" class="mt-4">
+            <!-- Categories and input fields for rates will be populated here -->
+        </div>
+        <button class="btn btn-primary mt-4" onclick="submitRates()">Submit Rates</button>
     </div>
-    <button onclick="submitRates()">Submit Rates</button>
 
     <script>
         async function fetchCities() {
@@ -45,12 +50,14 @@
 
             categoriesData.categories.forEach(category => {
                 const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'form-group';
                 const label = document.createElement('label');
                 label.textContent = category.name;
                 const input = document.createElement('input');
                 input.type = 'number';
                 input.value = rates[category._id] || ''; // Set existing rate if available
                 input.id = `rate-${category._id}`;
+                input.className = 'form-control';
                 categoryDiv.appendChild(label);
                 categoryDiv.appendChild(input);
                 document.getElementById('categories').appendChild(categoryDiv);
@@ -84,5 +91,9 @@
 
         fetchCities();
     </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
