@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import List
 import jwt
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 from app.api.v1.schemas.user import UserSchema, UserRead
@@ -100,16 +100,15 @@ def get_current_user(api_key: str = Depends(api_key_header)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@router.get("/me1")
-def get_current_user(
+@router.get("/me")
+def get_current_user_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["user_id"]
     # Convert user_id from string to ObjectId
-
-    # Convert user_id from string to ObjectId
     object_id = ObjectId(user_id)
 
+    # Fetch user details from the database using the ObjectId
     # Fetch user details from the database using the ObjectId
     user_details = db.users.find_one({"_id": object_id})
     if not user_details:
@@ -127,32 +126,3 @@ def get_current_user(
         ]
 
     return user_details
-
-
-@router.get("/me", response_model=UserRead)
-def get_current_user_endpoint(
-    current_user: dict = Depends(get_current_user),
-):
-    user_id = current_user["user_id"]
-    # Convert user_id from string to ObjectId
-    object_id = ObjectId(user_id)
-
-    # Fetch user details from the database using the ObjectId
-    user_details = db.users.find_one({"_id": object_id})
-    if not user_details:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # Optionally, return any specific user details
-    return UserRead(
-        id=str(user_details["_id"]),
-        mobile=user_details["mobile"],
-        roles=user_details["roles"],
-        status=user_details.get(
-            "status", False
-        ),  # Ensure status has a default value of False
-        name=user_details.get("name"),
-        city=user_details.get("city"),
-        skills=user_details.get("skills", []),
-        experience=user_details.get("experience", 0),
-        rating=user_details.get("rating", 0.0),
-    )
